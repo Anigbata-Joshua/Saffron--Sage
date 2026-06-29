@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../services/auth";
+import { auth } from "../../lib/auth";
 import { LuUser } from "react-icons/lu";
 
 export default function Header({ title }) {

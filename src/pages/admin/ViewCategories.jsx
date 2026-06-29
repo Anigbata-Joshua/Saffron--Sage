@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import DashboardLayout from "../../components/admin/DashboardLayout";
 import PageTransition from "../../components/PageTransition";
 import { api } from "../../services/api";
-import { auth } from "../../services/auth";
+import { auth } from "../../lib/auth";
 import { staggerContainer, staggerItem, fadeUp } from "../../animations";
 
 export default function ViewCategories() {

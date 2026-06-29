@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { auth } from "../../services/auth";
+import { auth } from "../../lib/auth";
 
 // Import clean line icons from Lucide pack
 import { 
@@ -29,6 +29,8 @@ const navItems = [
 export default function Sidebar() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+   const merchant = auth.getMerchant();
+    const name = merchant?.first_name || "";
 
   const handleLogout = () => {
     auth.logout();
@@ -63,7 +65,7 @@ export default function Sidebar() {
       >
         {/* Logo / Brand Header */}
         <div className="p-6 text-2xl font-bold border-b border-gray-800/60 tracking-tight text-white flex justify-between items-center">
-          <span>Admin.</span>
+          <span>{name}'s Store</span>
         </div>
 
         {/* Navigation Section */}
@@ -99,7 +101,7 @@ export default function Sidebar() {
             <span>Logout</span>
           </button>
           <p className="text-[11px] text-gray-500 text-center mt-1 font-mono">
-            &copy; 2026 Rework Admin
+            &copy; 2026 Saffron & Sage Admin
           </p>
         </div>
       </aside>

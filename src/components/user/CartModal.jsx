@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useCart } from "../../context/CartContext";
+import { parsePrice, formatNaira } from "../../lib/format";
 
 export default function CartModal({ product, image, onClose }) {
   const { cart } = useCart();
-  const total = cart.reduce((acc, item) => {
-    const price = Number(String(item.price).replace(/[^0-9.-]+/g, ""));
-    return acc + price * item.quantity;
-  }, 0);
+  const total = cart.reduce((acc, item) => acc + parsePrice(item.price) * item.quantity, 0);
 
   return (
     <motion.div
@@ -43,18 +41,18 @@ export default function CartModal({ product, image, onClose }) {
           <motion.div className="space-y-2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <h3 className="text-2xl font-semibold uppercase">{product.title}</h3>
             <p className="text-sm text-gray-500 uppercase tracking-wide">Saffron & Sage</p>
-            <p className="text-sm text-gray-600">1 × ₦{product.price}</p>
+            <p className="text-sm text-gray-600">1 × {formatNaira(product.price)}</p>
           </motion.div>
 
           <motion.div className="space-y-4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
             <motion.div whileHover={{ scale: 1.01 }}>
-              <Link to="/cart" className="block w-full bg-black text-white py-3 text-center text-sm uppercase tracking-wide hover:bg-gray-800 transition">
+              <Link to="/checkout" className="block w-full bg-black text-white py-3 text-center text-sm uppercase tracking-wide hover:bg-gray-800 transition">
                 Proceed to Checkout
               </Link>
             </motion.div>
             <div className="text-sm text-gray-600">
               <p>Order subtotal</p>
-              <p className="text-lg font-bold">₦{total.toLocaleString()}</p>
+              <p className="text-lg font-bold">{formatNaira(total)}</p>
               <p className="text-xs mt-1">Your cart contains {cart.length} item(s)</p>
             </div>
             <motion.div whileHover={{ scale: 1.01 }}>
@@ -63,7 +61,7 @@ export default function CartModal({ product, image, onClose }) {
                 Continue Shopping
               </Link>
             </motion.div>
-            <Link to="/cart" className="block w-full text-center text-xs text-gray-500 underline">
+            <Link to="/cart" onClick={onClose} className="block w-full text-center text-xs text-gray-500 underline">
               View or edit your cart
             </Link>
           </motion.div>

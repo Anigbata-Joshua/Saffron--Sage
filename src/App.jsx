@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { CartProvider } from "./context/CartContext";
+import { ProductsProvider } from "./context/ProductsContext";
 
 // Admin pages
 import AdminLogin from "./pages/admin/Login";
@@ -19,6 +20,7 @@ import Home from "./pages/user/Home";
 import Shop from "./pages/user/Shop";
 import ProductPage from "./pages/user/ProductPage";
 import Cart from "./pages/user/Cart";
+import Checkout from "./pages/user/Checkout";
 import Account from "./pages/user/Account";
 
 function AnimatedRoutes() {
@@ -31,6 +33,7 @@ function AnimatedRoutes() {
         <Route path="/shop" element={<Shop />} />
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/account" element={<Account />} />
 
         {/* Admin public routes */}
@@ -54,10 +57,12 @@ function AnimatedRoutes() {
 
 export default function App() {
   return (
-    <CartProvider>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <AnimatedRoutes />
-      </BrowserRouter>
-    </CartProvider>
+    <ProductsProvider>
+      <CartProvider>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AnimatedRoutes />
+        </BrowserRouter>
+      </CartProvider>
+    </ProductsProvider>
   );
 }

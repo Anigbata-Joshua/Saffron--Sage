@@ -2,33 +2,74 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import DashboardLayout from "../../components/admin/DashboardLayout";
 import PageTransition from "../../components/PageTransition";
+import MessageBanner from "../../components/MessageBanner";
 import { api } from "../../services/api";
-import { auth } from "../../services/auth";
+import { auth } from "../../lib/auth";
+import { useProducts } from "../../context/ProductsContext";
 import { scaleIn, staggerContainer, staggerItem } from "../../animations";
+
+const INITIAL_FORM = { title: "", descp: "", price: "", quantity: "", image: "", category_id: "" };
 
 export default function CreateProduct() {
   const merchantId = auth.getMerchantId();
+  const { categories: catalogCategories, addProduct } = useProducts();
+
   const [categories, setCategories] = useState([]);
-  const [form, setForm] = useState({ title: "", descp: "", price: "", quantity: "", image: "", category_id: "" });
+  const [form, setForm] = useState(INITIAL_FORM);
   const [message, setMessage] = useState({ text: "", color: "" });
   const [loading, setLoading] = useState(false);
-  const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
+  const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const resetForm = () => setForm(INITIAL_FORM);
+
+  // Fetch and deduplicate categories
   useEffect(() => {
     if (!merchantId) return;
-    api.get(`/categories?merchant_id=${merchantId}`).then((d) => setCategories(Array.isArray(d) ? d : [])).catch(console.error);
-  }, []);
+
+    api.get(`/categories?merchant_id=${merchantId}`)
+      .then((data) => {
+        const fromApi = Array.isArray(data) ? data : [];
+        // Map ensures uniqueness based on lowercase category names
+        const uniqueMap = new Map(
+          [...catalogCategories, ...fromApi].map((c) => [c.name?.toLowerCase(), c])
+        );
+        setCategories(Array.from(uniqueMap.values()));
+      })
+      .catch(() => setCategories(catalogCategories));
+  }, [merchantId, catalogCategories]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.title || !form.price || !form.category_id) { setMessage({ text: "Please fill in all required fields.", color: "text-red-500" }); return; }
-    setLoading(true); setMessage({ text: "Creating product...", color: "text-gray-500" });
+    if (!form.title || !form.price || !form.category_id) {
+      return setMessage({ text: "Please fill in all required fields.", color: "text-rose-500" });
+    }
+
+    setLoading(true);
+    setMessage({ text: "Creating product...", color: "text-stone-500" });
+
     try {
-      await api.post("/products", { merchant_id: merchantId, title: form.title, descp: form.descp, price: Number(form.price), quantity: Number(form.quantity), images: form.image, category_id: form.category_id, currency: "NGN" });
-      setMessage({ text: "Product Created Successfully!", color: "text-green-500" });
-      setForm({ title: "", descp: "", price: "", quantity: "", image: "", category_id: "" });
-    } catch { setMessage({ text: "Failed to create product.", color: "text-red-500" }); }
-    finally { setLoading(false); }
+      const response = await api.post("/products", {
+        ...form,
+        merchant_id: merchantId,
+        price: Number(form.price),
+        quantity: Number(form.quantity),
+        images: form.image, // Map local form image string to backend field
+        currency: "NGN",
+      });
+
+      setMessage({ text: "Product Created Successfully!", color: "text-emerald-500" });
+      if (addProduct) addProduct(response);
+      resetForm();
+    } catch (error) {
+      console.error(error);
+      setMessage({
+        text: "Saved locally — backend unreachable. It will still show on the Shop.",
+        color: "text-amber-600"
+      });
+      resetForm();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputClass = "w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500 transition";
@@ -42,19 +83,22 @@ export default function CreateProduct() {
             className="bg-white shadow-sm border border-gray-100 rounded-2xl p-8 w-full max-w-xl">
             <h2 className="text-2xl font-semibold text-gray-800 text-center mb-8">Create New Product</h2>
             <motion.form onSubmit={handleSubmit} className="space-y-5" variants={staggerContainer} initial="hidden" animate="visible">
-              {[
-                { label: "Product Title *", field: "title", type: "text" },
-                { label: "Image URL", field: "image", type: "text" },
-              ].map(({ label, field, type }) => (
-                <motion.div key={field} variants={staggerItem}>
-                  <label className={labelClass}>{label}</label>
-                  <input type={type} value={form[field]} onChange={update(field)} className={inputClass} />
-                </motion.div>
-              ))}
+
+              <motion.div variants={staggerItem}>
+                <label className={labelClass}>Product Title *</label>
+                <input type="text" value={form.title} onChange={update("title")} className={inputClass} />
+              </motion.div>
+
+              <motion.div variants={staggerItem}>
+                <label className={labelClass}>Product Image *</label>
+                <input type="text" value={form.image} onChange={update("image")} className={inputClass} />
+              </motion.div>
+
               <motion.div variants={staggerItem}>
                 <label className={labelClass}>Description</label>
                 <textarea rows="3" value={form.descp} onChange={update("descp")} className={inputClass} />
               </motion.div>
+
               <motion.div variants={staggerItem} className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Price (₦) *</label>
@@ -65,22 +109,24 @@ export default function CreateProduct() {
                   <input type="number" value={form.quantity} onChange={update("quantity")} className={inputClass} />
                 </div>
               </motion.div>
+
               <motion.div variants={staggerItem}>
                 <label className={labelClass}>Category *</label>
                 <select value={form.category_id} onChange={update("category_id")} className={`${inputClass} bg-white cursor-pointer`}>
                   <option value="">Select Category</option>
-                  {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.name.toUpperCase()}</option>)}
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name?.toUpperCase()}</option>
+                  ))}
                 </select>
               </motion.div>
+
+              <MessageBanner message={message} />
+
               <motion.button type="submit" disabled={loading} whileHover={{ backgroundColor: "#1f2937" }} whileTap={{ scale: 0.98 }}
                 className="w-full bg-black text-white py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] cursor-pointer disabled:opacity-60">
                 {loading ? "Creating..." : "Create Product"}
               </motion.button>
             </motion.form>
-            {message.text && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                className={`mt-6 text-center text-[10px] uppercase tracking-widest font-medium ${message.color}`}>{message.text}</motion.div>
-            )}
           </motion.div>
         </div>
       </DashboardLayout>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../../services/api";
-import { auth } from "../../services/auth";
+import { auth } from "../../lib/auth";
+import MessageBanner from "../../components/MessageBanner";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -159,11 +160,7 @@ export default function Merchant() {
               </span>
             </label>
 
-            {message.text && (
-              <div className={`text-xs font-bold uppercase tracking-widest text-center min-h-5 ${message.color}`}>
-                {message.text}
-              </div>
-            )}
+            <MessageBanner message={message} className="!text-center min-h-5" />
 
             <button
               type="submit"

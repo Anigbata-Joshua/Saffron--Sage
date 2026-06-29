@@ -1,49 +1,61 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-const CartContext = createContext();
+const CartContext = createContext(undefined);
+
+// Set the unified localStorage key name across the whole ecosystem
+const CART_STORAGE_KEY = "saffronSage_cart";
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("bohemian_cart")) || [];
-    } catch {
+      return JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) ?? [];
+    } catch (err) {
+      console.error("Failed to parse cart localStorage:", err);
       return [];
     }
   });
 
-  // Sync to localStorage whenever cart changes
+  // Keep localStorage synced perfectly using the new key
   useEffect(() => {
-    localStorage.setItem("bohemian_cart", JSON.stringify(cart));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart]);
 
   const cartCount = cart.reduce((acc, item) => acc + (Number(item.quantity) || 1), 0);
 
   const addToCart = (product) => {
+    const targetId = product.id ?? product._id;
+    if (!targetId) return;
+
     setCart((prev) => {
-      const existing = prev.findIndex((i) => i.id === product.id);
-      if (existing !== -1) {
+      const existingIndex = prev.findIndex((item) => (item.id ?? item._id) === targetId);
+      
+      if (existingIndex !== -1) {
         const updated = [...prev];
-        updated[existing] = { ...updated[existing], quantity: updated[existing].quantity + 1 };
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: (updated[existingIndex].quantity ?? 1) + (product.quantity ?? 1)
+        };
         return updated;
       }
-      return [...prev, { ...product, quantity: 1 }];
+
+      return [...prev, { ...product, id: targetId, quantity: product.quantity ?? 1 }];
     });
   };
 
   const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((i) => i.id !== id));
+    setCart((prev) => prev.filter((item) => (item.id ?? item._id) !== id));
   };
 
   const increaseQty = (id) => {
     setCart((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i))
+      prev.map((item) => ((item.id ?? item._id) === id ? { ...item, quantity: (item.quantity ?? 1) + 1 } : item))
     );
   };
 
   const decreaseQty = (id) => {
     setCart((prev) =>
-      prev.map((i) =>
-        i.id === id ? { ...i, quantity: Math.max(1, i.quantity - 1) } : i
+      prev.map((item) =>
+        (item.id ?? item._id) === id ? { ...item, quantity: Math.max(1, (item.quantity ?? 1) - 1) } : item
       )
     );
   };
@@ -57,4 +69,10 @@ export function CartProvider({ children }) {
   );
 }
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error("useCart must be executed within an explicit <CartProvider /> tree element scope.");
+  }
+  return context;
+};

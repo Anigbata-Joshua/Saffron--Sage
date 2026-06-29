@@ -45,20 +45,117 @@ export default function Home() {
 
         {/* Hero Section */}
         <motion.div
-          className="w-[95%] mx-auto mt-4"
+          className="relative w-full"
           variants={fadeIn}
           initial="hidden"
           animate="visible"
         >
-          <div className="h-[80vh] md:h-[90vh] w-full overflow-hidden bg-gray-100">
+          <div className="relative h-[80vh] md:h-[90vh] w-full overflow-hidden bg-stone-900">
+            {/* Base hero image */}
             <motion.img
               src={hero}
               alt="Hero"
-              className="w-full h-fit object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
               initial={{ scale: 1.08 }}
               animate={{ scale: 1 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
+              transition={{ duration: 1.4, ease: "easeOut" }}
             />
+
+            {/* Professional multi-stop gradient overlay */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(115deg, rgba(15,12,8,0.85) 0%, rgba(40,28,20,0.55) 28%, rgba(120,70,40,0.25) 48%, rgba(200,150,90,0.15) 68%, rgba(255,235,210,0.45) 100%)",
+              }}
+            />
+
+            {/* Soft saffron accent wash (top-right) */}
+            <div
+              className="absolute inset-0 mix-blend-overlay"
+              style={{
+                background:
+                  "radial-gradient(circle at 85% 18%, rgba(234,144,60,0.55) 0%, rgba(234,144,60,0) 55%)",
+              }}
+            />
+
+            {/* Sage accent wash (bottom-left) */}
+            <div
+              className="absolute inset-0 mix-blend-overlay"
+              style={{
+                background:
+                  "radial-gradient(circle at 12% 88%, rgba(112,140,110,0.55) 0%, rgba(112,140,110,0) 60%)",
+              }}
+            />
+
+            {/* Bottom darkening for legibility */}
+            <div
+              className="absolute inset-x-0 bottom-0 h-1/3"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(15,12,8,0.65) 0%, rgba(15,12,8,0) 100%)",
+              }}
+            />
+
+            {/* Hero Copy & CTA */}
+            <div className="relative z-10 h-full flex flex-col justify-end pb-16 md:pb-24 px-6 sm:px-12 lg:px-20">
+              <motion.span
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="text-amber-200 text-[10px] md:text-xs tracking-[0.45em] uppercase font-semibold mb-3"
+              >
+                The Spring Collection
+              </motion.span>
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55, duration: 0.7 }}
+                className="text-white font-serif font-light text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] max-w-3xl"
+              >
+                Effortless Style,{" "}
+                <span
+                  className="italic"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(90deg, #F4D9B5 0%, #E89A4A 50%, #B26A3C 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  Crafted in Colour
+                </span>
+                .
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.6 }}
+                className="text-stone-200/90 text-sm md:text-base font-light max-w-xl mt-4 leading-relaxed"
+              >
+                Discover Saffron & Sage's signature silhouettes — natural fibres, vibrant palettes and timeless cuts designed for the modern wardrobe.
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.85, duration: 0.6 }}
+                className="flex flex-wrap gap-3 mt-7"
+              >
+                <Link
+                  to="/shop"
+                  className="px-7 py-3 bg-white text-stone-900 text-[11px] tracking-[0.3em] uppercase font-semibold hover:bg-stone-100 transition-colors"
+                >
+                  Shop the Collection
+                </Link>
+                <Link
+                  to="/shop?category=Classics"
+                  className="px-7 py-3 border border-white/70 text-white text-[11px] tracking-[0.3em] uppercase font-semibold hover:bg-white/10 transition-colors"
+                >
+                  Explore Classics
+                </Link>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
 

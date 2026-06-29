@@ -5,6 +5,7 @@ import Navbar from "../../components/user/Navbar";
 import Footer from "../../components/user/Footer";
 import PageTransition from "../../components/PageTransition";
 import { api } from "../../services/api";
+import { auth } from "../../lib/auth";
 import { fadeUp, scaleIn } from "../../animations";
 
 export default function Account() {

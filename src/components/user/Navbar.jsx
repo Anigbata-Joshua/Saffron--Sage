@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
-import { auth } from "../../services/auth";
+import { auth } from "../../lib/auth";
 
 const navItems = [
   { label: "New Arrivals", sub: ["New In"] },

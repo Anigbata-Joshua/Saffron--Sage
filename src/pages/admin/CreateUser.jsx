@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import DashboardLayout from "../../components/admin/DashboardLayout";
 import PageTransition from "../../components/PageTransition";
+import MessageBanner from "../../components/MessageBanner";
 import { api } from "../../services/api";
-import { auth } from "../../services/auth";
 import { scaleIn, staggerContainer, staggerItem } from "../../animations";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -20,17 +20,20 @@ export default function CreateUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ text: "", color: "" });
-    if (!passwordRegex.test(form.password)) { setMessage({ text: "Password must be 8+ chars with 1 uppercase and 1 number.", color: "text-red-500" }); return; }
-    if (!emailRegex.test(form.email)) { setMessage({ text: "Please enter a valid email address.", color: "text-red-500" }); return; }
+    if (!passwordRegex.test(form.password)) { setMessage({ text: "Password must be 8+ chars with 1 uppercase and 1 number.", color: "text-rose-500" }); return; }
+    if (!emailRegex.test(form.email)) { setMessage({ text: "Please enter a valid email address.", color: "text-rose-500" }); return; }
     setLoading(true);
     try {
       const data = await api.post("/users", { first_name: form.first_name, last_name: form.last_name, email: form.email, phone: form.phone, password: form.password });
-      if (data.id) { setMessage({ text: "Account Created! Redirecting...", color: "text-green-500" }); setTimeout(() => navigate("/admin/users"), 1500); }
-
-      else { setMessage({ text: data.msg || "Registration failed.", color: "text-red-500" }); }
+      if (data.id) {
+        setMessage({ text: "Account Created! Redirecting...", color: "text-emerald-500" });
+        setTimeout(() => navigate("/admin/users"), 1500);
+      } else {
+        setMessage({ text: data.msg || "Registration failed.", color: "text-rose-500" });
+      }
     } catch (error) {
-      console.error("Reg  Error:", error); // <-- Add this line
-      setMessage({ text: "Connection error. Please try again.", color: "text-red-500" });
+      console.error("Reg Error:", error);
+      setMessage({ text: "Connection error. Please try again.", color: "text-rose-500" });
     }
     finally { setLoading(false); }
   };
@@ -62,15 +65,12 @@ export default function CreateUser() {
                   <input type={type} value={form[field]} onChange={update(field)} className={inputClass} required />
                 </motion.div>
               ))}
+              <MessageBanner message={message} />
               <motion.button type="submit" disabled={loading} whileHover={{ backgroundColor: "#1f2937" }} whileTap={{ scale: 0.98 }}
                 className="w-full bg-black text-white py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] cursor-pointer disabled:opacity-60">
                 {loading ? "Creating..." : "Create User Account"}
               </motion.button>
             </motion.form>
-            {message.text && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                className={`mt-6 text-center text-[10px] uppercase tracking-widest font-medium ${message.color}`}>{message.text}</motion.div>
-            )}
           </motion.div>
         </div>
       </DashboardLayout>

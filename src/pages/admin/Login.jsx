@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { api } from "../../services/api";
-import { auth } from "../../services/auth";
+import { auth } from "../../lib/auth";
 import PageTransition from "../../components/PageTransition";
+import MessageBanner from "../../components/MessageBanner";
 import { slideInLeft, slideInRight, fadeUp } from "../../animations";
 
 export default function Login() {
@@ -20,16 +21,15 @@ export default function Login() {
     try {
       const data = await api.post("/merchants/login", { email, password });
       if (!data.id) {
-        setMessage({ text: "Email or password mismatch.", color: "text-red-500" });
-        setTimeout(() => window.location.reload(), 5000);
+        setMessage({ text: "Email or password mismatch.", color: "text-rose-500" });
         return;
       }
       auth.setMerchant(data);
-      setMessage({ text: "Login Successful!", color: "text-green-500" });
+      setMessage({ text: "Login Successful!", color: "text-emerald-500" });
       setTimeout(() => navigate("/admin/dashboard"), 1500);
     } catch (error) {
       console.error("Full Login Error:", error);
-      setMessage({ text: "Connection error. Please try again.", color: "text-red-500" });
+      setMessage({ text: "Connection error. Please try again.", color: "text-rose-500" });
     } finally {
       setLoading(false);
     }
@@ -72,12 +72,7 @@ export default function Login() {
             </motion.div>
 
             <form onSubmit={handleLogin} className="space-y-6">
-              {message.text && (
-                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-                  className={`text-xs font-bold uppercase tracking-widest ${message.color}`}>
-                  {message.text}
-                </motion.div>
-              )}
+              <MessageBanner message={message} />
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
